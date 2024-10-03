@@ -67,23 +67,17 @@ def Open_Activity_Window():
     global Window, df, Last_Row_Index
     Activity_Window = tk.Toplevel(Window) 
     Activity_Window.title("Actividad realizada")
-    Activity_Window.geometry("1200x500")
-    Activity_Window.geometry("+{}+{}".format(int(Activity_Window.winfo_screenwidth() / 2 - 600), int(Activity_Window.winfo_screenheight() / 2 - 250)))  # Center the window.
+    Activity_Window.geometry("300x200")
     
-    Activity_Window.attributes('-topmost', True)  # Mantener ventana al frente.
-    Activity_Window.attributes('-toolwindow', True)  # Deshabilitar minimizar. 
-
+    Activity_Window.grab_set()         
     Activity_Window.transient(Window)  
-    Activity_Window.focus_force()  # Forzar el foco en la ventana.
-    Activity_Window.grab_set()  # Impedir hacer clic fuera de la ventana.   
     Activity_Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
-    Label = tk.Label(Activity_Window, text="¿Qué hiciste en lugar de lo previsto?", font=("Calibri Light", 14))
+    Label = tk.Label(Activity_Window, text="¿Qué hiciste en lugar de lo previsto?")
     Label.pack(pady=20)
 
-    Justification_Box = tk.Entry(Activity_Window, width=30, font=("Calibri Light", 14), justify='center')  # Center cursor in the Entry box.
-  # Aumentar tamaño de la caja de texto
-    Justification_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribuir
+    Justification_Box = tk.Entry(Activity_Window)
+    Justification_Box.pack(pady=10)
 
     def Press_Close():
         global df, Last_Row_Index
@@ -91,8 +85,8 @@ def Open_Activity_Window():
         Activity_Window.destroy()
         Open_Promise_Window()
 
-    Close_Button = tk.Button(Activity_Window, text="Close", command=Press_Close, font=("Calibri Light", 14))
-    Close_Button.pack(pady=20)
+    Close_Button = tk.Button(Activity_Window, text="Close", command=Press_Close)
+    Close_Button.pack()
 
     Window.wait_window(Activity_Window)
 
@@ -102,22 +96,17 @@ def Open_Promise_Window():
 
     Promise_Window = tk.Toplevel(Window) 
     Promise_Window.title("Additional Information")
-    Promise_Window.geometry("1200x500")
-    Promise_Window.geometry("+{}+{}".format(int(Promise_Window.winfo_screenwidth() / 2 - 600), int(Promise_Window.winfo_screenheight() / 2 - 250)))  # Center the window.
+    Promise_Window.geometry("300x200")
     
-    Promise_Window.attributes('-topmost', True)  # Mantener ventana al frente.
-    Promise_Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.       
-
+    Promise_Window.grab_set()         
     Promise_Window.transient(Window)  
-    Promise_Window.focus_force()  # Forzar el foco en la ventana.
-    Promise_Window.grab_set()  # Impedir hacer clic fuera de la ventana.
     Promise_Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
-    Label = tk.Label(Promise_Window, text=f"¿Qué vas a hacer en los próximos {Minutes_Period} minutos?", font=("Calibri Light", 14))
+    Label = tk.Label(Promise_Window, text=f"¿Qué vas a hacer en los próximos {Minutes_Period} minutos?")
     Label.pack(pady=20)
 
-    Promise_Box = tk.Entry(Promise_Window, width=30, font=("Calibri Light", 14), justify='center')  # Center cursor in the Entry box.
-    Promise_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribuir
+    Promise_Box = tk.Entry(Promise_Window)
+    Promise_Box.pack(pady=10)
 
     def Press_Promise():
         global df, Last_Row_Index, Minutes_Period, End_Last_Period, Now_Minus_Period, Difference_Minutes
@@ -152,10 +141,11 @@ def Open_Promise_Window():
 
         Window.destroy()
 
-    Promise_Button = tk.Button(Promise_Window, text="Promise", command=Press_Promise, font=("Calibri Light", 14))
-    Promise_Button.pack(pady=20)
+    Promise_Button = tk.Button(Promise_Window, text="Promise", command=Press_Promise)
+    Promise_Button.pack()
 
     Window.wait_window(Promise_Window)
+
 
 ##################
 ### PROGRAMA #####
@@ -184,6 +174,7 @@ def Run_Main_Logic():
       
         # Verificar si End_Last_Period es un objeto Timestamp
         if isinstance(End_Last_Period, pd.Timestamp):
+            
             End_Last_Period = End_Last_Period.to_pydatetime() 
         elif isinstance(End_Last_Period, str):
             try:
@@ -195,56 +186,44 @@ def Run_Main_Logic():
         else:
             print(f"Tipo de dato inesperado: {type(End_Last_Period)}")    
     else:
+        
         End_Last_Period = Now_Minus_Period
         
+
     Difference = Now_Minus_Period - End_Last_Period
+    
     Difference_Minutes = round(Difference.total_seconds() / 60)
     
     if Difference_Minutes <= Time_Error and len(df) > 0:
 
         Window = tk.Tk()
         Window.title("Pasaron los quince...")
-        Window.geometry("1200x500")
-        Window.geometry("+{}+{}".format(int(Window.winfo_screenwidth() / 2 - 600), int(Window.winfo_screenheight() / 2 - 250)))  # Center the window.
+        Window.geometry("400x300")
 
-        Etiqueta = tk.Label(Window, text=f"Este era tu plan: \n\n {df[PLAN_PREVISTO][Last_Row_Index]} \n\n ¿Lo hiciste?", font=("Calibri Light", 14))
-        Etiqueta.pack(pady=20)
+        Etiqueta = tk.Label(Window, text=f"Este era tu plan: \n\n {df[PLAN_PREVISTO][Last_Row_Index]} \n\n ¿Lo hiciste?")
+        Etiqueta.pack()
 
-        Yes_Button = tk.Button(Window, text="Sí", command=Press_Done, font=("Calibri Light", 14))
-        Yes_Button.pack(pady=10)
+        Yes_Button = tk.Button(Window, text="Sí", command=Press_Done)
+        Yes_Button.pack()
 
-        No_Button = tk.Button(Window, text="No", command=Press_Undone, font=("Calibri Light", 14))
-        No_Button.pack(pady=10)
-
-        Window.attributes('-topmost', True)  # Mantener ventana al frente.
-        Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
-        
-        Window.focus_force()  # Forzar el foco en la ventana.
-        Window.grab_set()  # Impedir hacer clic fuera de la ventana.
-        Window.protocol("WM_DELETE_WINDOW", Disable_Event)
+        No_Button = tk.Button(Window, text="No", command=Press_Undone)
+        No_Button.pack()
 
         Window.mainloop()
 
     else:
         Window = tk.Tk()
         Window.title("Se inicia un nuevo período.")
-        Window.geometry("1200x500")
-        Window.geometry("+{}+{}".format(int(Window.winfo_screenwidth() / 2 - 600), int(Window.winfo_screenheight() / 2 - 250)))  # Center the window.
+        Window.geometry("400x300")
 
-        Etiqueta = tk.Label(Window, text=f"Arranque, maestro.", font=("Calibri Light", 14))
-        Etiqueta.pack(pady=20)
+        Etiqueta = tk.Label(Window, text=f"Arranque, maestro.")
+        Etiqueta.pack()
 
         def Press_Start():           
             Open_Promise_Window()
 
-        Start_Button = tk.Button(Window, text = "Empezar", command = Press_Start, font=("Calibri Light", 14))
-        Start_Button.pack(pady=10)
-
-        Window.attributes('-topmost', True)  # Mantener ventana al frente.
-        Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
-        Window.focus_force()  # Forzar el foco en la ventana.
-        Window.grab_set()  # Impedir hacer clic fuera de la ventana.
-        Window.protocol("WM_DELETE_WINDOW", Disable_Event)
+        Start_Button = tk.Button(Window, text = "Empezar", command = Press_Start)
+        Start_Button.pack()
 
         Window.mainloop()
 
