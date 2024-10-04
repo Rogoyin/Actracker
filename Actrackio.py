@@ -17,10 +17,10 @@ import sys
 ##################
 
 # Path del excel.
-EXCEL_PATH = 'C:/Users/tomas/Documents/Programación/Github/Patricionog/Tempusio/Periods.xlsx'
+EXCEL_PATH = 'C:/Users/tomas/Documents/Programación/Github/Patricionog/Actrackio/Periods.xlsx'
 
 # Path to your sound file.
-Sound_Path = "C:/Users/tomas/Documents/Programación/Github/Patricionog/Tempusio/Alarm.mp3"
+Sound_Path = "C:/Users/tomas/Documents/Programación/Github/Patricionog/Actrackio/Alarm.mp3"
 
 
 
