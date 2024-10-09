@@ -11,16 +11,23 @@ from openpyxl.styles import Alignment, Border, Side
 import pygame
 import random
 import sys
+from pathlib import Path
+import os
+
+
 
 ##################
 ### PATHS ########
 ##################
 
+# Path del código.
+CODE_PATH = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
+
 # Path del excel.
-EXCEL_PATH = 'C:/Users/tomas/Documents/Programación/Github/Patricionog/Actrackio/Periods.xlsx'
+EXCEL_PATH = CODE_PATH / 'Periods.xlsx'
 
 # Path to your sound file.
-Sound_Path = "C:/Users/tomas/Documents/Programación/Github/Patricionog/Actrackio/Alarm.mp3"
+SOUND_PATH = CODE_PATH / 'Alarm.mp3'
 
 
 
@@ -28,7 +35,7 @@ Sound_Path = "C:/Users/tomas/Documents/Programación/Github/Patricionog/Actracki
 ### FRASES #######
 ##################
 
-Phrases = [
+PHRASES = [
             "Seguí el plan. Confiá en el yo de ayer que te encomendó lo de hoy.",
             "Pequeñitos esfuerzos repetidos día tras día hacen al gran resultado.",
             "No es que tengamos poco tiempo, sino que perdemos mucho. No lo pierdas.",
@@ -106,15 +113,17 @@ ACTIVIDAD_REALIZADA = 'Actividad_Realizada'
 EXPLICACION = 'Explicación'
 
 # Variables.
-Minutes_Period = 10
-Time_Error = 1
+MINUTES_PERIOD = 10
+TIME_ERROR = 1
 
 # Noche.
-Start_Night = dt.time(22,0)
-End_Night = dt.time(6,0)
+START_NIGHT = dt.time(22,0)
+END_NIGHT = dt.time(6,0)
 
 # Hora actual.
-Start_Time = dt.datetime.now()
+START_TIME = dt.datetime.now()
+
+
 
 ##################
 ### FUNCIONES ####
@@ -285,8 +294,8 @@ def Disable_Event():
 def Press_Done():
     global df, Last_Row_Index
         
-    df.loc[Last_Row_Index, ACTIVIDAD_REALIZADA] = df.loc[Last_Row_Index, PLAN_PREVISTO]
-    df.loc[Last_Row_Index, EXPLICACION] = 'Soy un crack'
+    df.loc[Last_Row_Index, ACTIVIDAD_REALIZADA] = '✓'
+    df.loc[Last_Row_Index, EXPLICACION] = '-'
     Open_Promise_Window()
 
 def Press_Undone():
@@ -302,6 +311,7 @@ def Open_Activity_Window():
     
     Activity_Window.attributes('-topmost', True)  # Mantener ventana al frente.
     Activity_Window.attributes('-toolwindow', True)  # Deshabilitar minimizar. 
+    #Activity_Window.overrideredirect(True)  # Remove window decorations (title bar).
 
     Activity_Window.transient(Window)  
     Activity_Window.focus_force()  # Forzar el foco en la ventana.
@@ -331,10 +341,12 @@ def Open_Activity_Window():
     Close_Button = tk.Button(Activity_Window, text="Close", command=Press_Close, font=("Calibri Light", 14))
     Close_Button.pack(pady=20)
 
+    # Hide the current window after processing the action.
+    # Window.withdraw()
     Window.wait_window(Activity_Window)
 
 def Open_Promise_Window():
-    global Window, Minutes_Period, Phrase
+    global Window, MINUTES_PERIOD, Phrase
 
     Promise_Window = tk.Toplevel(Window) 
     Promise_Window.title("Planear próximo intervalo")
@@ -342,26 +354,27 @@ def Open_Promise_Window():
     Promise_Window.geometry("+{}+{}".format(int(Promise_Window.winfo_screenwidth() / 2 - 600), int(Promise_Window.winfo_screenheight() / 2 - 250)))  # Center the window.
     
     Promise_Window.attributes('-topmost', True)  # Keep the window on top.
-    Promise_Window.attributes('-toolwindow', True)  # Disable minimize.       
+    Promise_Window.attributes('-toolwindow', True)  # Disable minimize.  
+    #Promise_Window.overrideredirect(True)  # Remove window decorations (title bar).     
 
     Promise_Window.transient(Window)  
     Promise_Window.focus_force()  # Force focus on the window.
     Promise_Window.grab_set()  # Prevent clicking outside the window.
     Promise_Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
-    Label = tk.Label(Promise_Window, text=f"¿Qué vas a hacer en los próximos {Minutes_Period} minutos?", font=("Calibri Light", 14))
+    Label = tk.Label(Promise_Window, text=f"¿Qué vas a hacer en los próximos {MINUTES_PERIOD} minutos?", font=("Calibri Light", 14))
     Label.pack(pady=20)
 
     Promise_Box = tk.Entry(Promise_Window, width=30, font=("Calibri Light", 14), justify='center')  # Center cursor in the Entry box.
     Promise_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribute
 
     def Press_Promise():
-        global df, Last_Row_Index, Minutes_Period, End_Last_Period, Now_Minus_Period, Difference_Minutes
+        global df, Last_Row_Index, MINUTES_PERIOD, End_Last_Period, Now_Minus_Period, Difference_Minutes
         global INICIO, FINAL, PLAN_PREVISTO, ACTIVIDAD_REALIZADA, EXPLICACION
 
         Period = {
-            INICIO: Start_Time,
-            FINAL: Start_Time + dt.timedelta(days=0, hours=0, minutes=Minutes_Period),
+            INICIO: START_TIME,
+            FINAL: START_TIME + dt.timedelta(days=0, hours=0, minutes=MINUTES_PERIOD),
             PLAN_PREVISTO: Promise_Box.get(),
             ACTIVIDAD_REALIZADA: '-',
             EXPLICACION: '-'
@@ -381,12 +394,12 @@ def Open_Promise_Window():
 
 def Check_Time(Window, Start, Seconds):
     if (dt.datetime.now() - Start).total_seconds() > Seconds:
-        global df, Last_Row_Index, Minutes_Period, End_Last_Period, Now_Minus_Period, Difference_Minutes
+        global df, Last_Row_Index, MINUTES_PERIOD, End_Last_Period, Now_Minus_Period, Difference_Minutes
         global INICIO, FINAL, PLAN_PREVISTO, ACTIVIDAD_REALIZADA, EXPLICACION
 
         Period = {
-            INICIO: Start_Time,
-            FINAL: Start_Time + dt.timedelta(days=0, hours=0, minutes=Minutes_Period),
+            INICIO: START_TIME,
+            FINAL: START_TIME + dt.timedelta(days=0, hours=0, minutes=MINUTES_PERIOD),
             PLAN_PREVISTO: '-',
             ACTIVIDAD_REALIZADA: '-',
             EXPLICACION: '-'
@@ -400,26 +413,28 @@ def Check_Time(Window, Start, Seconds):
         # Guardar en excel.
         df[INICIO] = pd.to_datetime(df[INICIO]).dt.strftime('%Y-%m-%d %H:%M')  
         df[FINAL] = pd.to_datetime(df[FINAL]).dt.strftime('%Y-%m-%d %H:%M')    
-        df.to_excel(EXCEL_PATH, index=False)
+        df.to_excel(EXCEL_PATH.as_posix(), index=False)
 
-        Adjust_Column_Width(EXCEL_PATH, 1, 2, 25)
-        Adjust_Column_Width(EXCEL_PATH, 3, 5, 40)
-        Formating_Book(EXCEL_PATH)
+        Adjust_Column_Width(EXCEL_PATH.as_posix(), 1, 2, 25)
+        Adjust_Column_Width(EXCEL_PATH.as_posix(), 3, 5, 40)
+        Formating_Book(EXCEL_PATH.as_posix())
 
         Window.destroy()
         sys.exit()
     else:
         Window.after(2000, Check_Time, Window, Start, Seconds)
 
+
+
 ##################
 ### PROGRAMA #####
 ##################
 
 # Call the function to play sound for 2 seconds.
-Play_Sound_For_Duration(Sound_Path, 2.0)
+Play_Sound_For_Duration(SOUND_PATH.as_posix(), 2.0)
 
 # Cargar base de datos
-df = pd.read_excel(EXCEL_PATH)
+df = pd.read_excel(EXCEL_PATH.as_posix())
 
 # Índice de la última fila
 if len(df) == 1:
@@ -428,7 +443,7 @@ else:
     Last_Row_Index = len(df) - 1
 
 # Calcular el tiempo desde ahora hacia atrás con el período elegido.
-Now_Minus_Period = Start_Time - dt.timedelta(minutes=Minutes_Period)
+Now_Minus_Period = START_TIME - dt.timedelta(minutes=MINUTES_PERIOD)
 
 # Si el df no está vacío, busca el final del período en la última fila.
 if len(df) > 0:
@@ -453,16 +468,16 @@ else:
 Difference = Now_Minus_Period - End_Last_Period # type: ignore
 Difference_Minutes = round(Difference.total_seconds() / 60) # type: ignore
 
-if Difference_Minutes <= Time_Error and len(df) > 0:
+# Check if the time is between 22:00 and 06:00.
+if START_TIME.time() >= START_NIGHT or START_TIME.time() <= END_NIGHT:
+    Phrase = 'Es hora de irse a dormir.'
+else:
+    Phrase = random.choice(PHRASES)
 
-    # Check if the time is between 22:00 and 06:00.
-    if Start_Time.time() >= Start_Night or Start_Time.time() <= End_Night:
-        Phrase = 'Es hora de irse a dormir.'
-    else:
-        Phrase = random.choice(Phrases)
+if Difference_Minutes <= TIME_ERROR and len(df) > 0:
 
     Window = tk.Tk()
-    Window.title(f"Pasaron los {Minutes_Period} minutos...")
+    Window.title(f"Pasaron los {MINUTES_PERIOD} minutos...")
     Window.geometry("1200x500")
     Window.geometry("+{}+{}".format(int(Window.winfo_screenwidth() / 2 - 600), int(Window.winfo_screenheight() / 2 - 250)))  # Center the window.
 
@@ -489,12 +504,13 @@ if Difference_Minutes <= Time_Error and len(df) > 0:
 
     Window.attributes('-topmost', True)  # Mantener ventana al frente.
     Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
+    #Window.overrideredirect(True)  # Remove window decorations (title bar).
     
     Window.focus_force()  # Forzar el foco en la ventana.
     Window.grab_set()  # Impedir hacer clic fuera de la ventana.
     Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
-    Check_Time(Window, Start_Time, 540)
+    Check_Time(Window, START_TIME, 540)
     Window.mainloop()
 
 else:
@@ -517,12 +533,13 @@ else:
     Window.focus_force()  # Forzar el foco en la ventana.
     Window.grab_set()  # Impedir hacer clic fuera de la ventana.
     Window.protocol("WM_DELETE_WINDOW", Disable_Event)
+    #Window.overrideredirect(True)  # Remove window decorations (title bar).
 
     for i in range(120):
-        if (dt.datetime.now() - Start_Time).total_seconds() > 120:
+        if (dt.datetime.now() - START_TIME).total_seconds() > 120:
             exit()
 
-    Check_Time(Window, Start_Time, 540)
+    Check_Time(Window, START_TIME, 540)
     Window.mainloop()
 
 # Reemplazar cualquier valor no válido (como '-') por NaT antes de convertir a datetime
@@ -531,8 +548,8 @@ df[FINAL] = pd.to_datetime(df[FINAL].replace('-', pd.NaT), format='%Y-%m-%d %H:%
 # Guardar en excel.
 df[INICIO] = pd.to_datetime(df[INICIO]).dt.strftime('%Y-%m-%d %H:%M')  
 df[FINAL] = pd.to_datetime(df[FINAL]).dt.strftime('%Y-%m-%d %H:%M')    
-df.to_excel(EXCEL_PATH, index=False)
+df.to_excel(EXCEL_PATH.as_posix(), index=False)
 
-Adjust_Column_Width(EXCEL_PATH, 1, 2, 25)
-Adjust_Column_Width(EXCEL_PATH, 3, 5, 40)
-Formating_Book(EXCEL_PATH)
+Adjust_Column_Width(EXCEL_PATH.as_posix(), 1, 2, 25)
+Adjust_Column_Width(EXCEL_PATH.as_posix(), 3, 5, 40)
+Formating_Book(EXCEL_PATH.as_posix())

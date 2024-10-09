@@ -1,0 +1,37 @@
+## To-do.
+
+# Programa.
+- Cartel de Config.
+- Cartel de Entrada que aparezca primero si es la primera vez que se ejecuta el programa y/o
+no hay TaskManager con instrucciones para descargar Python y los paquetes necesarios.
+- Task scheduler automático.
+- Borrar scheduler anterior.
+- Modificar su duración de intervalos.
+- Modificar su duración de alarma.
+- Modificar su archivo de frases.
+- Modificar su archivo de frases nocturnas.
+- Modificar su archivo de alarma.
+- Modificar su frase triunfante.
+- Pasar frases a archivo.
+- Agregar frases nocturnas.
+- Períodos y días ligados a conjuntos de frases personalizados.
+- Modularizar.
+- Configurar idiomas.
+
+# Ventanas.
+- Botón en todas las windows de "Config" + Apertura de cartel.
+- Botón de cambio de alarma en Config_Window + Búsqueda en directorio.
+- Botón de cambio de archivo de frases + Búsqueda en directorio.
+- Botón de "Abrir archivo de seguimiento".
+- Campo de check (marcado) con "Sonido de alarma". 
+- Campo de entrada con "Duración de la alarma (sec.)".
+- Campo de entrada con "Duración de intervalos (min.)".
+- Campo de entrada con "Frase de triunfo". 
+- Campo de entrada con "Inicio del período nocturno".
+- Campo de opciones con "Idioma".
+- Botón de cambio de archivo de frases nocturnas + Búsqueda en directorio.
+- Visualización de tareas realizadas.
+
+#
+- Manual del usuario.
+- Readme en Jupyter para developers.
