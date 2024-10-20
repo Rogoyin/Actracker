@@ -1,0 +1,9 @@
+### CHECKEO DE PROMESA ###
+TEXT → ¿Hiciste lo que prometiste?
+TEXT → Promesa
+BOTÓN → Sí
+BOTÓN → No
+
+### PROMESA ###
+ENTRY → ¿Qué vas a hacer en los próximos minutos?
+BOTÓN → 
