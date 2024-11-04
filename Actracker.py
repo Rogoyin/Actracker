@@ -113,7 +113,7 @@ ACTIVIDAD_REALIZADA = 'Actividad_Realizada'
 EXPLICACION = 'Explicación'
 
 # Variables.
-MINUTES_PERIOD = 10
+MINUTES_PERIOD = 20
 TIME_ERROR = 1
 
 # Noche.
@@ -333,6 +333,15 @@ def Open_Activity_Window():
 
     def Press_Close():
         global df, Last_Row_Index
+
+        # Check if either Activity_Box or Justify_Box is empty.
+        if not Activity_Box.get().strip():
+            tk.messagebox.showwarning("Empty Field", "Por favor, ingresa una actividad realizada.")
+            return
+        if not Justify_Box.get().strip():
+            tk.messagebox.showwarning("Empty Field", "Por favor, ingresa una explicación.")
+            return
+
         df.loc[Last_Row_Index, ACTIVIDAD_REALIZADA] = Activity_Box.get()
         df.loc[Last_Row_Index, EXPLICACION] = Justify_Box.get()
         Activity_Window.destroy()
@@ -346,42 +355,46 @@ def Open_Activity_Window():
     Window.wait_window(Activity_Window)
 
 def Open_Promise_Window():
-    global Window, MINUTES_PERIOD, Phrase
+    global Window, MINUTES_PERIOD, Phrase, Promise_Text  # Declarar Promise_Text como global.
 
     Promise_Window = tk.Toplevel(Window) 
     Promise_Window.title("Planear próximo intervalo")
     Promise_Window.geometry("1200x500")
-    Promise_Window.geometry("+{}+{}".format(int(Promise_Window.winfo_screenwidth() / 2 - 600), int(Promise_Window.winfo_screenheight() / 2 - 250)))  # Center the window.
+    Promise_Window.geometry("+{}+{}".format(int(Promise_Window.winfo_screenwidth() / 2 - 600), int(Promise_Window.winfo_screenheight() / 2 - 250)))  # Centrar ventana.
     
-    Promise_Window.attributes('-topmost', True)  # Keep the window on top.
-    Promise_Window.attributes('-toolwindow', True)  # Disable minimize.  
-    #Promise_Window.overrideredirect(True)  # Remove window decorations (title bar).     
-
+    Promise_Window.attributes('-topmost', True)  # Mantener la ventana al frente.
+    Promise_Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
     Promise_Window.transient(Window)  
-    Promise_Window.focus_force()  # Force focus on the window.
-    Promise_Window.grab_set()  # Prevent clicking outside the window.
+    Promise_Window.focus_force()  # Forzar el foco en la ventana.
+    Promise_Window.grab_set()  # Impedir clic fuera de la ventana.
     Promise_Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
     Label = tk.Label(Promise_Window, text=f"¿Qué vas a hacer en los próximos {MINUTES_PERIOD} minutos?", font=("Calibri Light", 14))
     Label.pack(pady=20)
 
-    Promise_Box = tk.Entry(Promise_Window, width=30, font=("Calibri Light", 14), justify='center')  # Center cursor in the Entry box.
-    Promise_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribute
+    Promise_Box = tk.Entry(Promise_Window, width=30, font=("Calibri Light", 14), justify='center')  # Centrar cursor en Entry.
+    Promise_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribuir
 
     def Press_Promise():
         global df, Last_Row_Index, MINUTES_PERIOD, End_Last_Period, Now_Minus_Period, Difference_Minutes
-        global INICIO, FINAL, PLAN_PREVISTO, ACTIVIDAD_REALIZADA, EXPLICACION
+        global INICIO, FINAL, PLAN_PREVISTO, ACTIVIDAD_REALIZADA, EXPLICACION, Promise_Text
+
+        # Store the text input for future checks.
+        Promise_Text = Promise_Box.get().strip()
+        
+        if not Promise_Text: 
+            tk.messagebox.showwarning("Empty Field", "Por favor, ingresa una actividad para continuar.")
+            return
 
         Period = {
             INICIO: START_TIME,
             FINAL: START_TIME + dt.timedelta(days=0, hours=0, minutes=MINUTES_PERIOD),
-            PLAN_PREVISTO: Promise_Box.get(),
+            PLAN_PREVISTO: Promise_Text,
             ACTIVIDAD_REALIZADA: '-',
             EXPLICACION: '-'
         }
-    
-        df = Add_Row_To_DataFrame(Period, df, Fill='-')
 
+        df = Add_Row_To_DataFrame(Period, df, Fill='-')
         Window.destroy()
 
     Prhase_Label = tk.Label(Promise_Window, text = f'"{Phrase}"', font=("Calibri Light", 14, "italic"), wraplength=800)
@@ -393,38 +406,38 @@ def Open_Promise_Window():
     Window.wait_window(Promise_Window)
 
 def Check_Time(Window, Start, Seconds):
+    global Promise_Text
+
     if (dt.datetime.now() - Start).total_seconds() > Seconds:
         global df, Last_Row_Index, MINUTES_PERIOD, End_Last_Period, Now_Minus_Period, Difference_Minutes
         global INICIO, FINAL, PLAN_PREVISTO, ACTIVIDAD_REALIZADA, EXPLICACION
 
-        Period = {
-            INICIO: START_TIME,
-            FINAL: START_TIME + dt.timedelta(days=0, hours=0, minutes=MINUTES_PERIOD),
-            PLAN_PREVISTO: '-',
-            ACTIVIDAD_REALIZADA: '-',
-            EXPLICACION: '-'
-        }
-    
-        df = Add_Row_To_DataFrame(Period, df, Fill='-')
+        # Period = {
+        #     INICIO: START_TIME,
+        #     FINAL: START_TIME + dt.timedelta(days=0, hours=0, minutes=MINUTES_PERIOD),
+        #     PLAN_PREVISTO: '-',
+        #     ACTIVIDAD_REALIZADA: '-',
+        #     EXPLICACION: '-'
+        # }
 
-        # Reemplazar cualquier valor no válido (como '-') por NaT antes de convertir a datetime
-        df[FINAL] = pd.to_datetime(df[FINAL].replace('-', pd.NaT), format='%Y-%m-%d %H:%M', errors='coerce') # type: ignore
+        # df = Add_Row_To_DataFrame(Period, df, Fill='-')
 
-        # Guardar en excel.
-        df[INICIO] = pd.to_datetime(df[INICIO]).dt.strftime('%Y-%m-%d %H:%M')  
-        df[FINAL] = pd.to_datetime(df[FINAL]).dt.strftime('%Y-%m-%d %H:%M')    
-        df.to_excel(EXCEL_PATH.as_posix(), index=False)
+        # # Reemplazar cualquier valor no válido (como '-') por NaT antes de convertir a datetime.
+        # df[FINAL] = pd.to_datetime(df[FINAL].replace('-', pd.NaT), format='%Y-%m-%d %H:%M', errors='coerce') # type: ignore
 
-        Adjust_Column_Width(EXCEL_PATH.as_posix(), 1, 2, 25)
-        Adjust_Column_Width(EXCEL_PATH.as_posix(), 3, 5, 40)
-        Formating_Book(EXCEL_PATH.as_posix())
+        # # Guardar en Excel.
+        # df[INICIO] = pd.to_datetime(df[INICIO]).dt.strftime('%Y-%m-%d %H:%M')  
+        # df[FINAL] = pd.to_datetime(df[FINAL]).dt.strftime('%Y-%m-%d %H:%M')    
+        # df.to_excel(EXCEL_PATH.as_posix(), index=False)
+
+        # Adjust_Column_Width(EXCEL_PATH.as_posix(), 1, 2, 25)
+        # Adjust_Column_Width(EXCEL_PATH.as_posix(), 3, 5, 40)
+        # Formating_Book(EXCEL_PATH.as_posix())
 
         Window.destroy()
         sys.exit()
     else:
         Window.after(2000, Check_Time, Window, Start, Seconds)
-
-
 
 ##################
 ### PROGRAMA #####
