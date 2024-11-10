@@ -113,7 +113,7 @@ ACTIVIDAD_REALIZADA = 'Actividad_Realizada'
 EXPLICACION = 'Explicación'
 
 # Variables.
-MINUTES_PERIOD = 20
+MINUTES_PERIOD = 10
 TIME_ERROR = 1
 
 # Noche.
@@ -307,34 +307,46 @@ def Open_Activity_Window():
     Activity_Window = tk.Toplevel(Window) 
     Activity_Window.title("Actividad realizada")
     Activity_Window.geometry("1200x500")
-    Activity_Window.geometry("+{}+{}".format(int(Activity_Window.winfo_screenwidth() / 2 - 600), int(Activity_Window.winfo_screenheight() / 2 - 250)))  # Center the window.
-    
+    Activity_Window.geometry("+{}+{}".format(int(Activity_Window.winfo_screenwidth() / 2 - 600), int(Activity_Window.winfo_screenheight() / 2 - 250)))  # Centrar la ventana.
+
     Activity_Window.attributes('-topmost', True)  # Mantener ventana al frente.
     Activity_Window.attributes('-toolwindow', True)  # Deshabilitar minimizar. 
-    #Activity_Window.overrideredirect(True)  # Remove window decorations (title bar).
 
     Activity_Window.transient(Window)  
     Activity_Window.focus_force()  # Forzar el foco en la ventana.
     Activity_Window.grab_set()  # Impedir hacer clic fuera de la ventana.   
     Activity_Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
+    def Set_Initial_Position():
+        global Initial_X, Initial_Y
+        Initial_X = Activity_Window.winfo_x()
+        Initial_Y = Activity_Window.winfo_y()
+    
+    # Establecer la posición inicial después de 10ms para asegurar que la ventana esté completamente renderizada.
+    Activity_Window.after(10, Set_Initial_Position)
+
+    # Definir función para bloquear el movimiento de la ventana.
+    def Block_Movement(event):
+        Activity_Window.geometry(f"+{Initial_X}+{Initial_Y}")
+
+    # Vincular el evento de movimiento a la función Block_Movement.
+    Activity_Window.bind("<Configure>", Block_Movement)
+
     Label = tk.Label(Activity_Window, text="¿Qué hiciste en lugar de lo previsto?", font=("Calibri Light", 14))
     Label.pack(pady=20)
 
-    Activity_Box = tk.Entry(Activity_Window, width=30, font=("Calibri Light", 14), justify='center')  # Center cursor in the Entry box.
-    # Aumentar tamaño de la caja de texto
-    Activity_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribuir
+    Activity_Box = tk.Entry(Activity_Window, width=30, font=("Calibri Light", 14), justify='center')  # Centrar cursor en la caja de entrada.
+    Activity_Box.pack(pady=10, padx=20, expand=True, fill='both')
 
     Label = tk.Label(Activity_Window, text="¿Por qué?", font=("Calibri Light", 14))
     Label.pack(pady=20)
 
-    Justify_Box = tk.Entry(Activity_Window, width=30, font=("Calibri Light", 14), justify='center')  # Center cursor in the Entry box.
-    Justify_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribuir
+    Justify_Box = tk.Entry(Activity_Window, width=30, font=("Calibri Light", 14), justify='center')
+    Justify_Box.pack(pady=10, padx=20, expand=True, fill='both')
 
     def Press_Close():
         global df, Last_Row_Index
 
-        # Check if either Activity_Box or Justify_Box is empty.
         if not Activity_Box.get().strip():
             tk.messagebox.showwarning("Empty Field", "Por favor, ingresa una actividad realizada.")
             return
@@ -350,8 +362,6 @@ def Open_Activity_Window():
     Close_Button = tk.Button(Activity_Window, text="Close", command=Press_Close, font=("Calibri Light", 14))
     Close_Button.pack(pady=20)
 
-    # Hide the current window after processing the action.
-    # Window.withdraw()
     Window.wait_window(Activity_Window)
 
 def Open_Promise_Window():
@@ -361,7 +371,7 @@ def Open_Promise_Window():
     Promise_Window.title("Planear próximo intervalo")
     Promise_Window.geometry("1200x500")
     Promise_Window.geometry("+{}+{}".format(int(Promise_Window.winfo_screenwidth() / 2 - 600), int(Promise_Window.winfo_screenheight() / 2 - 250)))  # Centrar ventana.
-    
+
     Promise_Window.attributes('-topmost', True)  # Mantener la ventana al frente.
     Promise_Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
     Promise_Window.transient(Window)  
@@ -369,17 +379,24 @@ def Open_Promise_Window():
     Promise_Window.grab_set()  # Impedir clic fuera de la ventana.
     Promise_Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
+    # Definir función para bloquear el movimiento de la ventana.
+    def Block_Movement(event):
+        Promise_Window.geometry(f"+{Initial_X}+{Initial_Y}")
+
+    # Vincular el evento de movimiento a la función Block_Movement.
+    Promise_Window.bind("<Configure>", Block_Movement)
+
+    # Elementos de la ventana.
     Label = tk.Label(Promise_Window, text=f"¿Qué vas a hacer en los próximos {MINUTES_PERIOD} minutos?", font=("Calibri Light", 14))
     Label.pack(pady=20)
 
-    Promise_Box = tk.Entry(Promise_Window, width=30, font=("Calibri Light", 14), justify='center')  # Centrar cursor en Entry.
-    Promise_Box.pack(pady=10, padx=20, expand=True, fill='both')  # Distribuir
+    Promise_Box = tk.Entry(Promise_Window, width=30, font=("Calibri Light", 14), justify='center')
+    Promise_Box.pack(pady=10, padx=20, expand=True, fill='both')
 
     def Press_Promise():
         global df, Last_Row_Index, MINUTES_PERIOD, End_Last_Period, Now_Minus_Period, Difference_Minutes
         global INICIO, FINAL, PLAN_PREVISTO, ACTIVIDAD_REALIZADA, EXPLICACION, Promise_Text
 
-        # Store the text input for future checks.
         Promise_Text = Promise_Box.get().strip()
         
         if not Promise_Text: 
@@ -397,6 +414,7 @@ def Open_Promise_Window():
         df = Add_Row_To_DataFrame(Period, df, Fill='-')
         Window.destroy()
 
+    # Frase y botón de "Prometo".
     Prhase_Label = tk.Label(Promise_Window, text = f'"{Phrase}"', font=("Calibri Light", 14, "italic"), wraplength=800)
     Prhase_Label.pack(pady=20)
 
@@ -444,7 +462,7 @@ def Check_Time(Window, Start, Seconds):
 ##################
 
 # Call the function to play sound for 2 seconds.
-Play_Sound_For_Duration(SOUND_PATH.as_posix(), 2.0)
+Play_Sound_For_Duration(SOUND_PATH.as_posix(), 0)
 
 # Cargar base de datos
 df = pd.read_excel(EXCEL_PATH.as_posix())
@@ -494,6 +512,19 @@ if Difference_Minutes <= TIME_ERROR and len(df) > 0:
     Window.geometry("1200x500")
     Window.geometry("+{}+{}".format(int(Window.winfo_screenwidth() / 2 - 600), int(Window.winfo_screenheight() / 2 - 250)))  # Center the window.
 
+    # Atributos para mantener la ventana centrada y bloqueada.
+    def Set_Initial_Position():
+        global Initial_X, Initial_Y
+        Initial_X = Window.winfo_x()
+        Initial_Y = Window.winfo_y()
+
+    Window.after(10, Set_Initial_Position)  # Establecer posición inicial después de 10 ms.
+
+    def Block_Movement(event):
+        Window.geometry(f"+{Initial_X}+{Initial_Y}")
+
+    Window.bind("<Configure>", Block_Movement)
+
     Plan_Label = tk.Label(Window, text="Este era tu plan:", font=("Calibri Light", 14))
     Plan_Label.pack(pady=20)
 
@@ -503,24 +534,19 @@ if Difference_Minutes <= TIME_ERROR and len(df) > 0:
     Question_Label = tk.Label(Window, text="¿Lo hiciste?", font=("Calibri Light", 14))
     Question_Label.pack(pady=20)
 
-    # Crear un Frame para contener los botones.
     Button_Frame = tk.Frame(Window)
-    Button_Frame.pack(pady = 20) 
+    Button_Frame.pack(pady=20)
 
-    # Crear el botón "Sí".
     Yes_Button = tk.Button(Button_Frame, text="Sí", command=Press_Done, font=("Calibri Light", 14), width=10, height=1)
     Yes_Button.pack(side=tk.LEFT, padx=5)
 
-    # Crear el botón "No".
     No_Button = tk.Button(Button_Frame, text="No", command=Press_Undone, font=("Calibri Light", 14), width=10, height=1)
     No_Button.pack(side=tk.LEFT, padx=5)
 
-    Window.attributes('-topmost', True)  # Mantener ventana al frente.
-    Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
-    #Window.overrideredirect(True)  # Remove window decorations (title bar).
-    
-    Window.focus_force()  # Forzar el foco en la ventana.
-    Window.grab_set()  # Impedir hacer clic fuera de la ventana.
+    Window.attributes('-topmost', True)
+    Window.attributes('-toolwindow', True)
+    Window.focus_force()
+    Window.grab_set()
     Window.protocol("WM_DELETE_WINDOW", Disable_Event)
 
     Check_Time(Window, START_TIME, 540)
@@ -532,21 +558,33 @@ else:
     Window.geometry("1200x500")
     Window.geometry("+{}+{}".format(int(Window.winfo_screenwidth() / 2 - 600), int(Window.winfo_screenheight() / 2 - 250)))  # Center the window.
 
-    Start_Label = tk.Label(Window, text=f"Arranque, maestro.", font=("Calibri Light", 14))
+    # Atributos para mantener la ventana centrada y bloqueada.
+    def Set_Initial_Position():
+        global Initial_X, Initial_Y
+        Initial_X = Window.winfo_x()
+        Initial_Y = Window.winfo_y()
+
+    Window.after(10, Set_Initial_Position)  # Establecer posición inicial después de 10 ms.
+
+    def Block_Movement(event):
+        Window.geometry(f"+{Initial_X}+{Initial_Y}")
+
+    Window.bind("<Configure>", Block_Movement)
+
+    Start_Label = tk.Label(Window, text="Arranque, maestro.", font=("Calibri Light", 14))
     Start_Label.pack(pady=20)
 
-    def Press_Start():           
+    def Press_Start():
         Open_Promise_Window()
 
-    Start_Button = tk.Button(Window, text = "Empezar", command = Press_Start, font=("Calibri Light", 14))
+    Start_Button = tk.Button(Window, text="Empezar", command=Press_Start, font=("Calibri Light", 14))
     Start_Button.pack(pady=10)
 
-    Window.attributes('-topmost', True)  # Mantener ventana al frente.
-    Window.attributes('-toolwindow', True)  # Deshabilitar minimizar.
-    Window.focus_force()  # Forzar el foco en la ventana.
-    Window.grab_set()  # Impedir hacer clic fuera de la ventana.
+    Window.attributes('-topmost', True)
+    Window.attributes('-toolwindow', True)
+    Window.focus_force()
+    Window.grab_set()
     Window.protocol("WM_DELETE_WINDOW", Disable_Event)
-    #Window.overrideredirect(True)  # Remove window decorations (title bar).
 
     for i in range(120):
         if (dt.datetime.now() - START_TIME).total_seconds() > 120:
@@ -554,7 +592,7 @@ else:
 
     Check_Time(Window, START_TIME, 540)
     Window.mainloop()
-
+    
 # Reemplazar cualquier valor no válido (como '-') por NaT antes de convertir a datetime
 df[FINAL] = pd.to_datetime(df[FINAL].replace('-', pd.NaT), format='%Y-%m-%d %H:%M', errors='coerce') # type: ignore
 
