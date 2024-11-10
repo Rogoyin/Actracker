@@ -407,7 +407,7 @@ def Open_Promise_Window():
             INICIO: START_TIME,
             FINAL: START_TIME + dt.timedelta(days=0, hours=0, minutes=MINUTES_PERIOD),
             PLAN_PREVISTO: Promise_Text,
-            ACTIVIDAD_REALIZADA: '-',
+            ACTIVIDAD_REALIZADA: '✓',
             EXPLICACION: '-'
         }
 
