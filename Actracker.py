@@ -418,8 +418,27 @@ def Open_Promise_Window():
     Prhase_Label = tk.Label(Promise_Window, text = f'"{Phrase}"', font=("Calibri Light", 14, "italic"), wraplength=800)
     Prhase_Label.pack(pady=20)
 
-    Promise_Button = tk.Button(Promise_Window, text = "Prometo", command = Press_Promise, font = ("Calibri Light", 14))
-    Promise_Button.pack(pady=20)
+    def Press_Repeat_Previous():
+        global df, Last_Row_Index, MINUTES_PERIOD, PLAN_PREVISTO
+        
+        # Obtener el texto del plan previsto del período anterior.
+        Previous_Plan = df.loc[Last_Row_Index, PLAN_PREVISTO]
+        
+        # Llenar el cuadro de texto con el plan previsto del período anterior.
+        Promise_Box.delete(0, tk.END)  # Borrar cualquier texto previo.
+        Promise_Box.insert(0, Previous_Plan)  # Insertar el texto del período anterior.
+
+    # Frame para contener los dos botones alineados horizontalmente
+    Button_Frame = tk.Frame(Promise_Window)
+    Button_Frame.pack(pady=20)
+
+    # Botón "Prometo"
+    Promise_Button = tk.Button(Button_Frame, text="Prometo", command=Press_Promise, font=("Calibri Light", 14))
+    Promise_Button.pack(side=tk.LEFT, padx=10)
+
+    # Botón "Repetir anterior"
+    Repeat_Button = tk.Button(Button_Frame, text="Repetir", command=Press_Repeat_Previous, font=("Calibri Light", 14))
+    Repeat_Button.pack(side=tk.LEFT, padx=10)
 
     Window.wait_window(Promise_Window)
 
